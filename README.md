@@ -25,6 +25,20 @@ npm install
 npm start
 ```
 
+### Web build & PWA
+
+Static export outputs `dist/` and includes:
+
+- **`public/manifest.json`** — installable app metadata (standalone, icons, theme)
+- **`public/sw.js`** — service worker for offline-ish caching after the first successful load  
+- **`public/icon-192.png`** / **`icon-512.png`** — app icons (regenerate with `python3 scripts/gen-pwa-icons.py` if needed)
+
+```bash
+npm run export:web
+```
+
+Deploy `dist/` to Netlify or Vercel (see repo config). Install prompts work best over **HTTPS** (including preview URLs).
+
 ## Structure
 
 ```text

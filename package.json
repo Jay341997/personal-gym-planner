@@ -8,7 +8,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "export:web": "expo export --platform web"
+    "export:web": "expo export --platform web",
+    "generate:pwa-icons": "python3 scripts/gen-pwa-icons.py"
   },
   "dependencies": {
     "@expo/metro-runtime": "~3.2.3",
