@@ -1,0 +1,12 @@
+# Free tier: https://netlify.com — Connect repo → Build settings use this file, or paste:
+#   Build command: npm run export:web
+#   Publish directory: dist
+[build]
+  command = "npm install && npm run export:web"
+  publish = "dist"
+
+# SPA fallback (real files under dist/, e.g. /_expo/static/*, are still served first)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

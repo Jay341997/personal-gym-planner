@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Personal Gym Planner",
+    "slug": "personal-gym-planner",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#050816"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#050816"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
