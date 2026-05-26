@@ -1,0 +1,435 @@
+diff --git a/AGENTS.md b/AGENTS.md
+new file mode 100644
+index 0000000..2ea9580
+--- /dev/null
++++ b/AGENTS.md
+@@ -0,0 +1,33 @@
++# amber-user-website Agent Notes
++
++This repository includes an in-repo LLM wiki scaffold under `.llm-wiki/`.
++
++## Purpose
++
++Use the wiki to accumulate stable project knowledge without mixing generated notes into product code.
++
++## Wiki layout
++
++- `.llm-wiki/raw/` contains immutable source inputs such as copied specs, command transcripts, screenshots, and investigation notes.
++- `.llm-wiki/wiki/` contains LLM-maintained markdown pages that summarize the codebase and connect concepts.
++- `.llm-wiki/schema/` defines how wiki pages should be written and updated.
++
++## Working rules
++
++- Treat product code as the source of truth for implementation details.
++- Treat `.llm-wiki/raw/` as append-only unless a duplicate or mistake is being corrected.
++- Prefer updating existing wiki pages over creating near-duplicate pages.
++- Record uncertainty explicitly instead of guessing.
++- When a page cites code, include repo-relative file paths and enough context to relocate the source quickly.
++
++## Good workflow
++
++1. Read the relevant code or docs.
++2. If the input is external or ephemeral, snapshot it into `.llm-wiki/raw/`.
++3. Update one or more pages in `.llm-wiki/wiki/`.
++4. Keep page summaries short, factual, and cross-linked.
++
++## Current seed pages
++
++- `.llm-wiki/wiki/Overview.md`
++- `.llm-wiki/wiki/Architecture.md`
++- `.llm-wiki/wiki/Routes-and-Areas.md`
++- `.llm-wiki/wiki/Operations.md`
++- `.llm-wiki/wiki/Open-Questions.md`
+diff --git a/.llm-wiki/README.md b/.llm-wiki/README.md
+new file mode 100644
+index 0000000..ff53239
+--- /dev/null
++++ b/.llm-wiki/README.md
+@@ -0,0 +1,39 @@
++# LLM Wiki Workspace
++
++This directory is a lightweight, repo-local version of the LLM Wiki pattern for `amber-user-website`.
++
++## Goal
++
++Keep code understanding, architecture notes, and future investigation work in one place without polluting the app source tree.
++
++## Structure
++
++- `raw/`
++  Immutable inputs for the wiki. Put copied tickets, product notes, command outputs, screenshots, and one-off investigation artifacts here.
++- `wiki/`
++  LLM-maintained knowledge pages. These pages should summarize what the repo does today and link to related pages instead of duplicating content.
++- `schema/`
++  Rules for page naming, page structure, citations, and update behavior.
++
++## Suggested usage
++
++1. Add or capture source material in `raw/` when the information does not already live in the repo.
++2. Read the matching code paths in `src/`, `webpack/`, and `scripts/`.
++3. Update the relevant pages in `wiki/`.
++4. Add follow-up questions to `wiki/Open-Questions.md` instead of leaving them in chat history only.
++
++## What belongs here
++
++- Route maps
++- Architecture summaries
++- Operational runbooks
++- Integration notes
++- Known risks and open questions
++
++## What does not belong here
++
++- Generated build output
++- Private credentials
++- Large binary assets
++- Duplicated copies of source files when a link or citation is enough
++
++Start with:
++
++- `wiki/Overview.md`
++- `wiki/Architecture.md`
++- `wiki/Routes-and-Areas.md`
++- `wiki/Operations.md`
+diff --git a/.llm-wiki/schema/wiki-schema.md b/.llm-wiki/schema/wiki-schema.md
+new file mode 100644
+index 0000000..4ba5846
+--- /dev/null
++++ b/.llm-wiki/schema/wiki-schema.md
+@@ -0,0 +1,57 @@
++# Wiki Schema
++
++Use these conventions when creating or updating pages in `.llm-wiki/wiki/`.
++
++## Page template
++
++Every page should prefer this shape:
++
++1. `# Title`
++2. `## Summary`
++3. `## Key facts`
++4. `## Evidence`
++5. `## Related pages`
++6. `## Open questions` when needed
++
++## Writing rules
++
++- Prefer short factual paragraphs over long narrative dumps.
++- Prefer stable file paths like `src/routes/index.ts` over line numbers that drift quickly.
++- Call out environment-specific behavior when it changes for China, desktop, or whitelabel builds.
++- Separate facts from assumptions.
++- Update an existing page when the topic already exists.
++
++## Evidence rules
++
++When possible, back statements with one of:
++
++- Repo files
++- Commands that can be rerun locally
++- Captured artifacts in `.llm-wiki/raw/`
++
++Use a compact citation format:
++
++- `Code: src/routes/index.ts`
++- `Code: src/server/index.ts`
++- `Artifact: .llm-wiki/raw/<name>.md`
++
++## Page naming
++
++- Use `Pascal-Case.md` for wiki pages.
++- Keep names broad enough to survive refactors.
++- Prefer one durable page over multiple tiny pages.
++
++## Update policy
++
++- Do not rewrite the whole wiki for a small change.
++- Touch only the pages affected by the new information.
++- Add a brief note to `Open-Questions.md` when evidence is incomplete.
++
++## Seed topic map
++
++The current seed structure is:
++
++- `Overview.md`
++- `Architecture.md`
++- `Routes-and-Areas.md`
++- `Operations.md`
++- `Open-Questions.md`
++
++Add new pages only when a topic grows beyond a short section in one of the seed pages.
+diff --git a/.llm-wiki/raw/README.md b/.llm-wiki/raw/README.md
+new file mode 100644
+index 0000000..6419f49
+--- /dev/null
++++ b/.llm-wiki/raw/README.md
+@@ -0,0 +1,20 @@
++# Raw Inputs
++
++Store source material here when it should feed the wiki but is not already preserved in the repository.
++
++Examples:
++
++- Product requirements copied from tickets
++- Incident timelines
++- Meeting notes
++- Command transcripts
++- Screenshots or exported logs
++
++Rules:
++
++- Prefer markdown or plain text.
++- Keep filenames descriptive and date-prefixed when useful.
++- Do not store secrets.
++- Do not edit artifacts after capture unless you are fixing a clear mistake.
++
++If the source already exists in the repo, reference it from the wiki instead of duplicating it here.
+diff --git a/.llm-wiki/wiki/Overview.md b/.llm-wiki/wiki/Overview.md
+new file mode 100644
+index 0000000..a9b16b5
+--- /dev/null
++++ b/.llm-wiki/wiki/Overview.md
+@@ -0,0 +1,43 @@
++# Overview
++
++## Summary
++
++`amber-user-website` is a React 17 plus Express universal web application with server-side rendering, route-level data loading, and multiple runtime variants including default, desktop, China, and whitelabel modes.
++
++## Key facts
++
++- The project uses a custom SSR stack rather than Next.js.
++- Client and server bundles are built with Webpack.
++- Routing is defined centrally and supports language-prefixed paths for several areas.
++- Development and test workflows already exist through Yarn scripts.
++- The repository contains both customer-facing marketing flows and authenticated user flows.
++
++## Evidence
++
++- Code: package.json
++- Code: src/routes/index.ts
++- Code: src/server/index.ts
++- Code: webpack/server.config.ts
++
++## Notable product areas
++
++- Discovery flows such as home, search, and property pages
++- Conversion flows such as book form, application, and payment
++- Account flows such as profile, bookings, offers, and activity
++- Content flows such as blog, news, podcast, exams, and media mentions
++- Brand and campaign pages such as about, ambassador, scholarship, and referral
++
++## Development entry points
++
++- `yarn dev`
++- `yarn dev-desktop`
++- `yarn test`
++- `yarn lint`
++
++## Related pages
++
++- [Architecture](./Architecture.md)
++- [Routes and Areas](./Routes-and-Areas.md)
++- [Operations](./Operations.md)
++- [Open Questions](./Open-Questions.md)
+diff --git a/.llm-wiki/wiki/Architecture.md b/.llm-wiki/wiki/Architecture.md
+new file mode 100644
+index 0000000..0cbe740
+--- /dev/null
++++ b/.llm-wiki/wiki/Architecture.md
+@@ -0,0 +1,47 @@
++# Architecture
++
++## Summary
++
++The app is a custom universal React application. Express owns request handling, middleware, static asset serving, proxy endpoints, and SSR orchestration.
++
++## Key facts
++
++- The server boots from `src/server/index.ts`.
++- SSR logic lives under `src/server/`, including HTML rendering and request handling.
++- Route configuration lives in `src/routes/index.ts` and maps URLs to page modules plus optional `loadData` hooks.
++- State management is Redux Toolkit based and is initialized from `src/store/`.
++- Client bootstraps live under `src/client/` with separate entry files for desktop and China variants.
++
++## Runtime variants
++
++- Default web app via `yarn dev`
++- Desktop flavor via `yarn dev-desktop`
++- China builds via `yarn dev-china` and `yarn dev-china-desktop`
++- Whitelabel builds via `yarn dev-whitelabel` and `yarn dev-whitelabel-desktop`
++
++## Server responsibilities
++
++- Security middleware such as `helmet` and `hpp`
++- Static asset serving from `public/`
++- Proxy helpers under `/proxy`, `/myproxy`, and `/chinaproxy`
++- SSR rendering
++- Cache invalidation hooks and cron initialization
++
++## Build and test
++
++- Webpack configs live in `webpack/`
++- Babel config is in `babel.config.js`
++- Jest config is in `jest/config.js`
++- Style and lint rules are configured in repo root dotfiles
++
++## Evidence
++
++- Code: src/server/index.ts
++- Code: src/server/ssr.tsx
++- Code: src/client/index.tsx
++- Code: src/client/indexDesktop.tsx
++- Code: src/store/index.ts
++- Code: jest/config.js
++
++## Related pages
++
++- [Overview](./Overview.md)
++- [Routes and Areas](./Routes-and-Areas.md)
++- [Operations](./Operations.md)
+diff --git a/.llm-wiki/wiki/Routes-and-Areas.md b/.llm-wiki/wiki/Routes-and-Areas.md
+new file mode 100644
+index 0000000..6709d63
+--- /dev/null
++++ b/.llm-wiki/wiki/Routes-and-Areas.md
+@@ -0,0 +1,51 @@
++# Routes and Areas
++
++## Summary
++
++The route table is centralized and covers both anonymous discovery journeys and logged-in account flows. Several routes have language-prefixed variants.
++
++## Key facts
++
++- Home is served from `/` and `/:lang(es|de|fr)/`.
++- Search and property pages live under `/places/search/:id` and `/places/:id`.
++- Booking and payment flows live under `/places/:id/form`, `/places/:id/application`, `/places/:id/payment`, and payment completion routes.
++- Profile-adjacent routes include `/profile`, `/profile/leads`, `/profile/offers`, and `/activity`.
++- Content and brand pages are implemented as separate page modules under `src/pages/`.
++
++## High-level feature groups
++
++### Discovery
++
++- Home
++- Search
++- PropertyPage
++- List
++- UniversityPage
++
++### Conversion
++
++- BookForm
++- ApplicationForm
++- Payment
++- BookingDetails
++
++### Account and retention
++
++- Profile
++- Bookings
++- Offers
++- Activity
++- Settings
++- Support
++
++### Content and campaigns
++
++- Blog
++- News
++- Podcast
++- Exams
++- Ambassador
++- Scholarship
++- Referral
++- About
++
++## Evidence
++
++- Code: src/routes/index.ts
++- Code: src/pages/
++
++## Related pages
++
++- [Overview](./Overview.md)
++- [Architecture](./Architecture.md)
+diff --git a/.llm-wiki/wiki/Operations.md b/.llm-wiki/wiki/Operations.md
+new file mode 100644
+index 0000000..13d2ed4
+--- /dev/null
++++ b/.llm-wiki/wiki/Operations.md
+@@ -0,0 +1,44 @@
++# Operations
++
++## Summary
++
++The repo already includes standard local workflows for development, testing, linting, and environment-specific builds.
++
++## Key facts
++
++- Main local dev command is `yarn dev`.
++- Desktop mode uses `yarn dev-desktop`.
++- Tests run with `yarn test` using Jest and `ts-jest`.
++- Linting is split across code, type, style, and format commands.
++- Production builds are divided into server and client bundle steps.
++
++## Useful commands
++
++- `yarn dev`
++- `yarn dev-desktop`
++- `yarn test`
++- `yarn lint`
++- `yarn build`
++- `yarn analyze:server`
++- `yarn analyze:client`
++
++## Operational notes
++
++- `public/` contains static assets and generated server output.
++- `src/server/devServer.ts` participates in local development behavior.
++- Environment toggles are used heavily for China, desktop, and whitelabel modes.
++- There are cron-related scripts in `package.json` and `src/server/cronJobs.ts`.
++
++## Evidence
++
++- Code: package.json
++- Code: src/server/devServer.ts
++- Code: src/server/cronJobs.ts
++
++## Related pages
++
++- [Overview](./Overview.md)
++- [Architecture](./Architecture.md)
++- [Open Questions](./Open-Questions.md)
+diff --git a/.llm-wiki/wiki/Open-Questions.md b/.llm-wiki/wiki/Open-Questions.md
+new file mode 100644
+index 0000000..f32bc98
+--- /dev/null
++++ b/.llm-wiki/wiki/Open-Questions.md
+@@ -0,0 +1,25 @@
++# Open Questions
++
++## Summary
++
++This page tracks follow-up topics that deserve deeper investigation before the wiki grows further.
++
++## Current questions
++
++- Which page groups are business-critical versus legacy or low-traffic?
++- What is the preferred architectural boundary between `helpers/`, `utils/`, and `services/`?
++- Which routes are desktop-only versus shared with mobile?
++- How are cache invalidation and cron jobs operated in production?
++- Which app areas are actively owned by current teams?
++
++## Suggested next captures
++
++- A route inventory snapshot grouped by business domain
++- A data-flow note for Search and PropertyPage
++- A rendering note comparing mobile, desktop, China, and whitelabel entry points
++- A deployment note covering Webpack outputs, static assets, and server startup
++
++## Evidence
++
++- Code: src/routes/index.ts
++- Code: src/server/
++- Code: src/pages/
