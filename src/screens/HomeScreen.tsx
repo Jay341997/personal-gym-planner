@@ -5,6 +5,7 @@ import { ScreenContainer } from "../components/ScreenContainer";
 import { SectionTitle } from "../components/SectionTitle";
 import { StatCard } from "../components/StatCard";
 import { RoutineWarmupBlocks, RoutineCardioBlocks, RoutineStretchBlocks } from "../components/RoutinePrepSections";
+import { WorkoutMusicCard } from "../components/WorkoutMusicCard";
 
 type Props = {
   todayPlan: WorkoutDayPlan;
@@ -57,6 +58,9 @@ export function HomeScreen({
         <StatCard label="Done today" value={`${completedCount}`} helper="Completed exercises from your current plan." />
         <StatCard label="Beginner rule" value="Form first" helper="If form breaks, reduce weight." />
       </View>
+
+      <SectionTitle title="Music" subtitle="Exercise-focused mixes to start your session strong." />
+      <WorkoutMusicCard />
 
       <SectionTitle title="Today's Flow" subtitle="Do these three blocks in order before your lifts." />
 

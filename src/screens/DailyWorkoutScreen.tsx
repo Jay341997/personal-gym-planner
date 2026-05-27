@@ -6,6 +6,7 @@ import { SectionTitle } from "../components/SectionTitle";
 import { TimerCard } from "../components/TimerCard";
 import { ExerciseCard } from "../components/ExerciseCard";
 import { RoutineWarmupBlocks, RoutineCardioBlocks, RoutineStretchBlocks } from "../components/RoutinePrepSections";
+import { WorkoutMusicCard } from "../components/WorkoutMusicCard";
 import { getExercisePersonalBestKg, getIdealTargetKg } from "../utils/exerciseTargets";
 import { resolveExerciseSlot, slotExerciseOptions } from "../utils/exerciseSlot";
 
@@ -69,6 +70,9 @@ export function DailyWorkoutScreen({
           stretches.
         </Text>
       </View>
+
+      <SectionTitle title="Music" subtitle="Workout-ready Bollywood + English mixes." />
+      <WorkoutMusicCard />
 
       <SectionTitle title="Timers" subtitle="Whole-workout timer and rest between sets." />
       <View style={styles.timerRow}>
