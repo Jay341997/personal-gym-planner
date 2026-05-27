@@ -37,6 +37,17 @@ export function ToolsScreen({
     setHeightDraft(heightCm.toString());
   }, [heightCm]);
 
+  /** Commit height: onEndEditing is unreliable on web; onBlur + Save cover all platforms. */
+  function commitHeight() {
+    const raw = heightDraft.trim().replace(",", ".");
+    const parsed = parseFloat(raw);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      setHeightDraft(heightCm ? String(heightCm) : "");
+      return;
+    }
+    onUpdateHeight(parsed);
+  }
+
   return (
     <ScreenContainer>
       <SectionTitle title="Daily Tools" subtitle="Quick helpers that keep the app useful every day." />
@@ -93,11 +104,20 @@ export function ToolsScreen({
         <TextInput
           value={heightDraft}
           onChangeText={setHeightDraft}
-          keyboardType="numeric"
-          onEndEditing={() => onUpdateHeight(Number(heightDraft) || 0)}
+          keyboardType="decimal-pad"
+          returnKeyType="done"
+          blurOnSubmit
+          onBlur={commitHeight}
+          onEndEditing={commitHeight}
+          onSubmitEditing={commitHeight}
           style={styles.input}
         />
-        <Text style={styles.metricHint}>Update height once, then the BMI card stays ready.</Text>
+        <Pressable style={styles.saveHeightButton} onPress={commitHeight}>
+          <Text style={styles.saveHeightButtonText}>Save height</Text>
+        </Pressable>
+        <Text style={styles.metricHint}>
+          Tap outside the field, press Done, or tap Save — height is stored for BMI and ideal weight.
+        </Text>
       </View>
 
       <SectionTitle title="Daily Quote" />
@@ -184,6 +204,17 @@ const styles = StyleSheet.create({
     color: colors.textSoft,
     marginTop: spacing.sm,
     lineHeight: 20,
+  },
+  saveHeightButton: {
+    marginTop: spacing.md,
+    backgroundColor: colors.accent,
+    borderRadius: radii.pill,
+    alignItems: "center",
+    paddingVertical: 14,
+  },
+  saveHeightButtonText: {
+    color: colors.background,
+    fontWeight: "800",
   },
   quoteCard: {
     backgroundColor: colors.cardAlt,
