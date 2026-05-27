@@ -5,7 +5,9 @@ import { colors, radii, spacing } from "../theme/theme";
 import { ScreenContainer } from "../components/ScreenContainer";
 import { SectionTitle } from "../components/SectionTitle";
 import { StatCard } from "../components/StatCard";
+import { BodyWeightGoalChart } from "../components/BodyWeightGoalChart";
 import { ProgressChart } from "../components/ProgressChart";
+import { formatDateKey } from "../utils/date";
 
 type Props = {
   appData: AppData;
@@ -37,17 +39,6 @@ export function ProgressScreen({
     (sum, list) => sum + list.length,
     0
   );
-  const bodyWeightTrendBars = [...appData.bodyWeightEntries]
-    .sort((left, right) => left.date.localeCompare(right.date))
-    .slice(-10)
-    .map((entry) => ({
-      label: new Date(`${entry.date}T00:00:00`).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      }),
-      value: entry.weightKg,
-    }));
-
   function shortLabel(name: string) {
     return name.length > 10 ? `${name.slice(0, 10)}...` : name;
   }
@@ -112,15 +103,11 @@ export function ProgressScreen({
 
       <View style={styles.chartSpacer} />
 
-      <ProgressChart
-        title="Body Weight Over Time"
-        helper="Trend from your latest weight check-ins."
-        bars={
-          bodyWeightTrendBars.length > 0
-            ? bodyWeightTrendBars
-            : [{ label: "No logs", value: 0 }]
-        }
-        suffix="kg"
+      <BodyWeightGoalChart
+        heightCm={appData.heightCm}
+        bodyWeightEntries={appData.bodyWeightEntries}
+        latestWeight={latestWeight}
+        planStartDateKey={formatDateKey(new Date())}
       />
 
       <View style={styles.chartSpacer} />
