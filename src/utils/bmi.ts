@@ -14,3 +14,18 @@ export function getBmiCategory(bmi: number): string {
   if (bmi < 30) return "Overweight";
   return "Obesity range";
 }
+
+export function getIdealWeightKg(heightCm: number, targetBmi = 22): number {
+  if (!heightCm) return 0;
+  const heightM = heightCm / 100;
+  return targetBmi * heightM * heightM;
+}
+
+export function getHealthyWeightRangeKg(heightCm: number): { minKg: number; maxKg: number } {
+  if (!heightCm) return { minKg: 0, maxKg: 0 };
+  const heightM = heightCm / 100;
+  return {
+    minKg: 18.5 * heightM * heightM,
+    maxKg: 24.9 * heightM * heightM,
+  };
+}

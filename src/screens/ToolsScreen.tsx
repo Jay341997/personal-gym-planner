@@ -4,6 +4,7 @@ import { colors, radii, spacing } from "../theme/theme";
 import { ScreenContainer } from "../components/ScreenContainer";
 import { SectionTitle } from "../components/SectionTitle";
 import { StatCard } from "../components/StatCard";
+import { getHealthyWeightRangeKg, getIdealWeightKg } from "../utils/bmi";
 
 type Props = {
   waterMl: number;
@@ -29,6 +30,8 @@ export function ToolsScreen({
   onUpdateHeight,
 }: Props) {
   const [heightDraft, setHeightDraft] = useState(heightCm.toString());
+  const idealWeight = getIdealWeightKg(heightCm);
+  const healthyRange = getHealthyWeightRangeKg(heightCm);
 
   useEffect(() => {
     setHeightDraft(heightCm.toString());
@@ -48,6 +51,22 @@ export function ToolsScreen({
           label="BMI"
           value={bmi ? bmi.toFixed(1) : "--"}
           helper={bmiCategory}
+        />
+      </View>
+      <View style={styles.statsRow}>
+        <StatCard
+          label="Ideal weight"
+          value={idealWeight ? `${idealWeight.toFixed(1)} kg` : "--"}
+          helper={
+            idealWeight
+              ? `Healthy range: ${healthyRange.minKg.toFixed(1)}-${healthyRange.maxKg.toFixed(1)} kg`
+              : "Add your height to calculate ideal range."
+          }
+        />
+        <StatCard
+          label="Height"
+          value={heightCm ? `${heightCm} cm` : "--"}
+          helper="Used for BMI and ideal-weight estimate."
         />
       </View>
 

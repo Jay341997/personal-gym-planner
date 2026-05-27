@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { AppData } from "../types";
 import { colors, radii, spacing } from "../theme/theme";
 import { ScreenContainer } from "../components/ScreenContainer";
@@ -11,7 +11,15 @@ type Props = {
   appData: AppData;
   streak: number;
   weeklyBars: { label: string; value: number }[];
-  strengthBars: { label: string; value: number }[];
+  strengthCategoryProgress: {
+    category: string;
+    exercises: {
+      exerciseId: string;
+      exerciseName: string;
+      personalBest: number;
+      improvement: number;
+    }[];
+  }[];
   latestWeight: number | null;
   onAddBodyWeight: (weightKg: number) => void;
 };
@@ -20,7 +28,7 @@ export function ProgressScreen({
   appData,
   streak,
   weeklyBars,
-  strengthBars,
+  strengthCategoryProgress,
   latestWeight,
   onAddBodyWeight,
 }: Props) {
@@ -29,6 +37,20 @@ export function ProgressScreen({
     (sum, list) => sum + list.length,
     0
   );
+  const bodyWeightTrendBars = [...appData.bodyWeightEntries]
+    .sort((left, right) => left.date.localeCompare(right.date))
+    .slice(-10)
+    .map((entry) => ({
+      label: new Date(`${entry.date}T00:00:00`).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+      value: entry.weightKg,
+    }));
+
+  function shortLabel(name: string) {
+    return name.length > 10 ? `${name.slice(0, 10)}...` : name;
+  }
 
   return (
     <ScreenContainer>
@@ -91,11 +113,58 @@ export function ProgressScreen({
       <View style={styles.chartSpacer} />
 
       <ProgressChart
-        title="Strength Improvements"
-        helper="Personal best weights for key beginner lifts."
-        bars={strengthBars}
+        title="Body Weight Over Time"
+        helper="Trend from your latest weight check-ins."
+        bars={
+          bodyWeightTrendBars.length > 0
+            ? bodyWeightTrendBars
+            : [{ label: "No logs", value: 0 }]
+        }
         suffix="kg"
       />
+
+      <View style={styles.chartSpacer} />
+
+      <SectionTitle
+        title="Strength Improvements by Category"
+        subtitle="All exercises from your plan, grouped by muscle focus."
+      />
+      {strengthCategoryProgress.map((group) => {
+        const maxPb = Math.max(...group.exercises.map((entry) => entry.personalBest), 1);
+        return (
+          <View key={group.category} style={styles.groupCard}>
+            <Text style={styles.groupTitle}>{group.category}</Text>
+            <Text style={styles.groupHelper}>
+              {group.exercises.length} exercises |{" "}
+              {group.exercises.filter((item) => item.personalBest > 0).length} logged
+            </Text>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.categoryChartRow}
+            >
+              {group.exercises.map((item) => {
+                const heightPercent = Math.max(
+                  (item.personalBest / maxPb) * 100,
+                  item.personalBest > 0 ? 12 : 0
+                );
+
+                return (
+                  <View key={item.exerciseId} style={styles.barWrap}>
+                    <View style={styles.track}>
+                      <View style={[styles.fill, { height: `${heightPercent}%` }]} />
+                    </View>
+                    <Text style={styles.valueText}>{item.personalBest}kg</Text>
+                    <Text style={styles.improveText}>+{item.improvement}kg</Text>
+                    <Text style={styles.barLabel}>{shortLabel(item.exerciseName)}</Text>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+        );
+      })}
     </ScreenContainer>
   );
 }
@@ -136,5 +205,65 @@ const styles = StyleSheet.create({
   },
   chartSpacer: {
     height: spacing.xl,
+  },
+  groupCard: {
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  groupTitle: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: "800",
+  },
+  groupHelper: {
+    color: colors.textMuted,
+    fontSize: 12,
+    marginTop: 4,
+    marginBottom: spacing.sm,
+  },
+  categoryChartRow: {
+    paddingTop: spacing.xs,
+    paddingRight: spacing.sm,
+    gap: spacing.sm,
+  },
+  barWrap: {
+    width: 56,
+    alignItems: "center",
+  },
+  track: {
+    width: 26,
+    height: 120,
+    justifyContent: "flex-end",
+    backgroundColor: colors.backgroundElevated,
+    borderRadius: radii.pill,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  fill: {
+    width: "100%",
+    backgroundColor: colors.accent,
+    borderRadius: radii.pill,
+  },
+  valueText: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: "700",
+    marginTop: spacing.xs,
+  },
+  improveText: {
+    color: colors.textSoft,
+    fontSize: 11,
+    marginTop: 2,
+  },
+  barLabel: {
+    color: colors.textSoft,
+    fontSize: 10,
+    marginTop: 4,
+    textAlign: "center",
   },
 });

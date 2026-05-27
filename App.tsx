@@ -19,7 +19,7 @@ import { calculateBmi, getBmiCategory } from "./src/utils/bmi";
 import { formatDateKey, getTodayPlan } from "./src/utils/date";
 import {
   getCompletedCountForDay,
-  getStrengthSummary,
+  getStrengthCategoryProgress,
   getWorkoutStreak,
   getWeeklyCompletionBars,
 } from "./src/utils/progress";
@@ -60,22 +60,7 @@ export default function App() {
       : null;
   const quote = motivationQuotes[new Date().getDate() % motivationQuotes.length];
   const bmi = latestWeight ? calculateBmi(latestWeight, appData.heightCm) : 0;
-  const strengthBars = getStrengthSummary(appData, [
-    "bench-press",
-    "lat-pulldown",
-    "squat",
-    "deadlift",
-  ]).map((item) => ({
-    label:
-      item.exerciseId === "bench-press"
-        ? "Bench"
-        : item.exerciseId === "lat-pulldown"
-          ? "Pulldown"
-          : item.exerciseId === "squat"
-            ? "Squat"
-            : "Deadlift",
-    value: item.personalBest,
-  }));
+  const strengthCategoryProgress = getStrengthCategoryProgress(appData, workoutPlan);
   const exerciseById = useMemo(() => {
     const m = new Map<string, ExerciseVariant>();
     workoutPlan.forEach((plan) => {
@@ -298,7 +283,7 @@ export default function App() {
           appData={appData}
           streak={streak}
           weeklyBars={weeklyBars}
-          strengthBars={strengthBars}
+          strengthCategoryProgress={strengthCategoryProgress}
           latestWeight={latestWeight}
           onAddBodyWeight={addBodyWeight}
         />

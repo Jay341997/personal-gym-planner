@@ -1,4 +1,4 @@
-import { AppData, Exercise } from "../types";
+import { AppData, Exercise, WorkoutDayPlan } from "../types";
 import { formatDateKey, getDayName, getRecentDateKeys } from "./date";
 import { resolveExerciseSlot } from "./exerciseSlot";
 
@@ -94,4 +94,81 @@ export function getStrengthSummary(appData: AppData, exerciseIds: string[]) {
       improvement: Math.max(personalBest - startingWeight, 0),
     };
   });
+}
+
+export type StrengthExerciseProgress = {
+  exerciseId: string;
+  exerciseName: string;
+  personalBest: number;
+  improvement: number;
+};
+
+export type StrengthCategoryProgress = {
+  category: string;
+  exercises: StrengthExerciseProgress[];
+};
+
+function normalizeCategory(targetMuscle: string): string {
+  const text = targetMuscle.toLowerCase();
+
+  if (
+    text.includes("quad") ||
+    text.includes("hamstring") ||
+    text.includes("glute") ||
+    text.includes("leg")
+  ) {
+    return "Legs";
+  }
+  if (text.includes("chest") || text.includes("pec")) {
+    return "Chest";
+  }
+  if (text.includes("lat") || text.includes("back")) {
+    return "Back";
+  }
+  if (text.includes("shoulder") || text.includes("delt")) {
+    return "Shoulders";
+  }
+  if (text.includes("bicep") || text.includes("tricep") || text.includes("forearm") || text.includes("arm")) {
+    return "Arms";
+  }
+  if (text.includes("core") || text.includes("abs")) {
+    return "Core";
+  }
+  return "Other";
+}
+
+export function getStrengthCategoryProgress(appData: AppData, plan: WorkoutDayPlan[]): StrengthCategoryProgress[] {
+  const exercisesById = new Map<string, Exercise>();
+  plan.forEach((day) => {
+    day.exercises.forEach((exercise) => {
+      exercisesById.set(exercise.id, exercise);
+      exercise.alternatives?.forEach((alt) => {
+        exercisesById.set(alt.id, alt);
+      });
+    });
+  });
+
+  const grouped = new Map<string, StrengthExerciseProgress[]>();
+  exercisesById.forEach((exercise) => {
+    const history = appData.exerciseHistory[exercise.id] ?? [];
+    const personalBest = history.reduce((best, item) => Math.max(best, item.weightKg), 0);
+    const startingWeight = history[0]?.weightKg ?? 0;
+    const category = normalizeCategory(exercise.targetMuscle);
+    const list = grouped.get(category) ?? [];
+
+    list.push({
+      exerciseId: exercise.id,
+      exerciseName: exercise.name,
+      personalBest,
+      improvement: Math.max(personalBest - startingWeight, 0),
+    });
+    grouped.set(category, list);
+  });
+
+  return Array.from(grouped.entries())
+    .map(([category, exercises]) => ({
+      category,
+      exercises: exercises.sort((left, right) => right.improvement - left.improvement || left.exerciseName.localeCompare(right.exerciseName)),
+    }))
+    .sort((left, right) => left.category.localeCompare(right.category));
 }
